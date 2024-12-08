@@ -3,7 +3,7 @@ const db = require('../config/db');
 // Asegúrate de tener la conexión a la base de datos configurada
 
 // Función para crear un nuevo pedido (order)
-exports.createOrder = (userId, total, callback) => {
+createOrder = (userId, total, callback) => {
   if (!Number.isInteger(userId) || !Number.isFinite(total)) {
     return callback(new Error('Datos inválidos: userId debe ser un número entero y total debe ser un número válido.'));
   }
@@ -19,7 +19,7 @@ exports.createOrder = (userId, total, callback) => {
 };
 
 // Función para agregar un artículo a un pedido
-exports.addItem = (orderId, productId, quantity, price, callback) => {
+addItem = (orderId, productId, quantity, price, callback) => {
   if (
     !Number.isInteger(orderId) ||
     !Number.isInteger(productId) ||
