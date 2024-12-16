@@ -1,10 +1,11 @@
-// /routes/orderRoutes.js
+// routes/orderRoutes.js
 const express = require('express');
-const { checkout } = require('../controllers/orderController');  // Asegúrate de que se importe correctamente
-const { authMiddleware } = require('../middlewares/authMiddleware');
+const orderController = require('../controllers/orderController');
+const  authMiddleware = require('../middlewares/authMiddleware'); // Importar el middleware
+
 const router = express.Router();
 
-// Ruta de checkout que usa el middleware de autenticación
-router.post('/checkout', authMiddleware, checkout);
+// Usar el middleware de autenticación para las rutas protegidas
+router.post('/checkout', authMiddleware.authenticateToken, orderController.checkout);
 
 module.exports = router;

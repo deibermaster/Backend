@@ -1,44 +1,45 @@
-const db = require('../config/db'); // Suponiendo que usas MySQL
-const bcrypt = require('bcrypt');
+
+const db = require('../config/db'); // Importa el pool configurado con promesas
 
 const User = {
   // Crear un nuevo usuario
-  create: ({ id, username, email, password, role }) => {
-    const query = 'INSERT INTO users (id, username, email, password, role) VALUES (?, ?, ?, ?, ?)';
-    return new Promise((resolve, reject) => {
-      db.query(query, [id, username, email, password, role], (err, result) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(result);
-      });
-    });
+  create: async ({ username, email, password, role }) => {
+    const query = `
+      INSERT INTO users (username, email, password, role)
+      VALUES (?, ?, ?, ?)
+    `;
+    try {
+      const [result] = await db.execute(query, [username, email, password, role]);
+      return result;
+    } catch (error) {
+      console.error('Error al crear el usuario:', error);
+      throw error;
+    }
   },
 
-  findOneByEmail: (email) => {
-    const query = 'SELECT * FROM users WHERE email = ?';
-    return new Promise((resolve, reject) => {
-      db.query(query, [email], (err, results) => {
-        if (err) return reject(err);
-        if (results.length === 0) return resolve(null); // No se encontró el usuario
-        resolve(results[0]); // Retorna el primer resultado
-      });
-    });
+  // Buscar un usuario por email
+  findOneByEmail: async (email) => {
+    const query = `SELECT * FROM users WHERE email = ?`;
+    try {
+      const [rows] = await db.execute(query, [email]);
+      return rows.length > 0 ? rows[0] : null; // Devuelve el primer resultado o null
+    } catch (error) {
+      console.error('Error al buscar usuario por email:', error);
+      throw error;
+    }
   },
 
-   // Buscar un usuario por nombre de usuario
-  findByUsername: (username) => {
-    const query = 'SELECT * FROM users WHERE username = ?';
-    return new Promise((resolve, reject) => {
-      db.query(query, [username], (err, result) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(result[0]);
-      });
-    });
-  },
+  // Buscar un usuario por nombre de usuario
+  findByUsername: async (username) => {
+    const query = `SELECT * FROM users WHERE username = ?`;
+    try {
+      const [rows] = await db.execute(query, [username]);
+      return rows.length > 0 ? rows[0] : null;
+    } catch (error) {
+      console.error('Error al buscar usuario por nombre de usuario:', error);
+      throw error;
+    }
+  }
 };
-
 
 module.exports = User;

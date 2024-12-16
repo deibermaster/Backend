@@ -1,27 +1,31 @@
 const db = require('../config/db');
 
 const Product = {
-  findAll: (callback) => {
-    db.query('SELECT * FROM products', (err, results) => {
-      if (err) {
-        return callback(err, null);
-      }
-      callback(null, results);
-    });
+  // Usando promesas con then/catch
+  findAll: () => {
+    return db.query('SELECT * FROM products')
+      .then(([results]) => {
+        return results; // Retornar los productos obtenidos
+      })
+      .catch((err) => {
+        throw err; // Lanzar error si algo falla
+      });
   },
 
-  create: (name, price, expirationDate, imagenurl, callback) => {
-    if (!name || !price || !expirationDate || !imagenurl) {
-      return callback(new Error('Todos los campos son requeridos'), null);
+  create: (name, price, description, expirationDate, imagenurl) => {
+    if (!name || !price || !description || !expirationDate || !imagenurl) {
+      return Promise.reject(new Error('Todos los campos son requeridos'));
     }
 
-    db.query('INSERT INTO products (name, price, expiration_date, imagenurl) VALUES (?, ?, ?, ?)', 
-    [name, price, expirationDate, imagenurl], 
-    (err, result) => {
-      if (err) {
-        return callback(err, null);
-      }
-      callback(null, result);
+    return db.query(
+      'INSERT INTO products (name, price, description, expiration_date, imagenurl) VALUES (?, ?, ?, ?, ?)', 
+      [name, price, description, expirationDate, imagenurl]
+    )
+    .then(([result]) => {
+      return result; // Retornar el resultado
+    })
+    .catch((err) => {
+      throw err; // Lanzar error si algo falla
     });
   }
 };
