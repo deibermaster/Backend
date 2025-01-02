@@ -1,13 +1,20 @@
 // /utils/generateToken.js
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 
-const generateToken = (user) => {
+dotenv.config();
+
+
+function generateToken(user) {
   return jwt.sign(
-    { id: user.id, username: user.username, role: user.role }, // Datos que quieres incluir en el token
-    process.env.JWT_SECRET, // Clave secreta para firmar el token
-    { expiresIn: '1h' } // Tiempo de expiración del token
+    {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' } // Tiempo de expiración
   );
-};
+}
 
 module.exports = generateToken;
-

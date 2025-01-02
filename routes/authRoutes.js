@@ -1,9 +1,11 @@
-// /routes/authRoutes.js
+// routes/authRoutes.js
 const express = require('express');
-const { register, login } = require('../controllers/authController');
+const authController = require('../controllers/authController');
+
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);
+// Asegúrate de que esta ruta esté correctamente configurada para aceptar POST
+router.post('/register', authController.register);
+router.post('/login', authController.login);
 
 module.exports = router;

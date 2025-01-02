@@ -1,39 +1,49 @@
 const Product = require('../models/Product');
-const { uploadImage } = require('../utils/cloudinary');
-const upload = require('../middlewares/multer'); // Aquí requerimos Multer
+const  uploadImage = require('../utils/cloudinary');
 
+// Crear un producto con imagen subida a Cloudinary
 exports.createProduct = async (req, res) => {
-  const { name, price, expirationDate } = req.body;
+  console.log(req.body); // Log the incoming request body
+  const { name, price, description, expirationDate } = req.body;
 
-  // Validamos que se haya subido un archivo
+  // Validate all required fields
+  if (!name || !price || !description || !expirationDate) {
+    return res.status(400).json({ error: 'Todos los campos son requeridos' });
+  }
+
   if (!req.file) {
-    return res.status(400).json({ error: 'Debes subir un archivo de imagen' });
+    return res.status(400).json({ error: 'Por favor, sube una imagen.' });
   }
 
   try {
-    // Subir el archivo directamente desde el buffer de Multer a Cloudinary
-    const result = await uploadImage(req.file.buffer); // Aquí pasamos el buffer en lugar de una ruta temporal
-    const imagenurl = result.secure_url;  // Guardamos la URL de Cloudinary
+    const result = await uploadImage(req.file.buffer);
+    const image = result.secure_url;
 
-    // Crear el producto con la URL de la imagen
-    Product.create(name, price, expirationDate, imagenurl, (err, productResult) => {
-      if (err) {
-        return res.status(500).json({ error: 'Error al crear el producto' });
-      }
-      res.status(201).json({ message: 'Producto creado exitosamente', product: productResult });
-    });
+    const product = await Product.create(name, price, description, expirationDate, image);
+
+    res.status(201).json({ message: 'Producto creado exitosamente', product });
   } catch (err) {
-    res.status(500).json({ error: 'Error al subir la imagen a Cloudinary' });
+    console.error('Error al crear el producto:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor al crear el producto' });
   }
 };
 
+
 // Listar productos
 exports.getAllProducts = (req, res) => {
-  Product.findAll((err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Error al obtener los productos' });
-    }
-    res.status(200).json({ products: results });
-  });
+  Product.findAll()
+    .then((productos) => {
+      // Convertir el campo 'price' a un número antes de enviarlo
+      productos.forEach((producto) => {
+        producto.price = parseFloat(producto.price); // Asegurarse de que 'price' sea un número
+      });
+
+      res.json(productos); // Enviar productos como respuesta JSON
+    })
+    .catch((err) => {
+      console.error('Error al obtener productos:', err);
+      res.status(500).json({ message: 'Error al obtener productos' });
+    });
 };
+
 

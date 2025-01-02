@@ -21,4 +21,4 @@ const uploadImage = (fileBuffer) => {
   });
 };
 
-module.exports = { uploadImage };
+module.exports = uploadImage;

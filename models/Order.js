@@ -1,47 +1,56 @@
-// /models/Order.js
-const db = require('../config/db');
-// Asegúrate de tener la conexión a la base de datos configurada
+/**
+ * Creates a new order in the database.
+ * 
+ * @param {number} userId - The ID of the user creating the order.
+ * @param {number} total - The total amount of the order.
+ * @returns {Promise<Object>} - A promise that resolves to the result of the database query.
+ * @throws {Error} - Throws an error if the database query fails.
+ */
+exports.createOrder = async (userId, total) => {};
 
-// Función para crear un nuevo pedido (order)
-createOrder = (userId, total, callback) => {
-  if (!Number.isInteger(userId) || !Number.isFinite(total)) {
-    return callback(new Error('Datos inválidos: userId debe ser un número entero y total debe ser un número válido.'));
+/**
+ * Adds an item to an existing order in the database.
+ * 
+ * @param {number} orderId - The ID of the order to which the item is being added.
+ * @param {number} productId - The ID of the product being added to the order.
+ * @param {number} quantity - The quantity of the product being added.
+ * @param {number} price - The price of the product being added.
+ * @returns {Promise<Object>} - A promise that resolves to the result of the database query.
+ * @throws {Error} - Throws an error if the database query fails.
+ */
+exports.addItem = async (orderId, productId, quantity, price) => {};
+// models/Order.js
+
+const db = require('../config/db'); // Asegúrate de que la ruta sea correcta
+
+// Crear una orden
+exports.createOrder = async (userId, total) => {
+  try {
+    const [rows] = await db.execute(
+      'INSERT INTO orders (user_id, total) VALUES (?, ?)',
+      [userId, total]
+    );
+    return rows; // Devuelve las filas afectadas
+  } catch (error) {
+    console.error('Error creando la orden:', error);
+    throw error; // Lanza el error para manejarlo en el controlador
   }
-
-  const query = 'INSERT INTO orders (user_id, total) VALUES (?, ?)';
-  db.query(query, [userId, total], (err, results) => {
-    if (err) {
-      console.error('Error al crear el pedido:', err);
-      return callback(err);
-    }
-    callback(null, results);
-  });
 };
 
-// Función para agregar un artículo a un pedido
-addItem = (orderId, productId, quantity, price, callback) => {
-  if (
-    !Number.isInteger(orderId) ||
-    !Number.isInteger(productId) ||
-    !Number.isInteger(quantity) ||
-    !Number.isFinite(price)
-  ) {
-    return callback(new Error('Datos inválidos: orderId, productId y quantity deben ser enteros; price debe ser un número válido.'));
+// Añadir un producto a la orden
+exports.addItem = async (orderId, productId, quantity, price) => {
+  try {
+    const [rows] = await db.execute(
+      'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
+      [orderId, productId, quantity, price]
+    );
+    return rows; // Devuelve las filas afectadas
+  } catch (error) {
+    console.error('Error añadiendo el producto:', error);
+    throw error; // Lanza el error para manejarlo en el controlador
   }
-
-  const query = 'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)';
-  db.query(query, [orderId, productId, quantity, price], (err, results) => {
-    if (err) {
-      console.error('Error al agregar el artículo al pedido:', err);
-      return callback(err);
-    }
-    callback(null, results);
-  });
 };
 
-module.exports = {
-  createOrder,
-  addItem,
-};
+
 
 
