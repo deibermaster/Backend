@@ -1,39 +1,33 @@
-
 const Product = require('../models/Product');
-const { uploadImage } = require('../utils/cloudinary');
-const upload = require('../middlewares/multer'); // Aquí requerimos Multer
+const  uploadImage = require('../utils/cloudinary');
 
 // Crear un producto con imagen subida a Cloudinary
 exports.createProduct = async (req, res) => {
+  console.log(req.body); // Log the incoming request body
   const { name, price, description, expirationDate } = req.body;
 
-  // Validamos que se haya subido un archivo
+  // Validate all required fields
+  if (!name || !price || !description || !expirationDate) {
+    return res.status(400).json({ error: 'Todos los campos son requeridos' });
+  }
+
   if (!req.file) {
-    return res.status(400).json({ error: 'Debes subir un archivo de imagen' });
+    return res.status(400).json({ error: 'Por favor, sube una imagen.' });
   }
 
   try {
-    // Subir el archivo directamente desde el buffer de Multer a Cloudinary
-    const result = await uploadImage(req.file.buffer); // Pasamos el buffer de la imagen
-    const imagenurl = result.secure_url;  // Guardamos la URL de Cloudinary
+    const result = await uploadImage(req.file.buffer);
+    const image = result.secure_url;
 
-    // Crear el producto con la URL de la imagen
-    const productResult = await Product.create(name, price, description, expirationDate, imagenurl);  // Usamos await para la creación
+    const product = await Product.create(name, price, description, expirationDate, image);
 
-    // Si todo fue bien, respondemos con un mensaje de éxito
-    res.status(201).json({
-      message: 'Producto creado exitosamente',
-      product: productResult,
-    });
+    res.status(201).json({ message: 'Producto creado exitosamente', product });
   } catch (err) {
-    // Si ocurre algún error en la subida de la imagen o la creación del producto
-    console.error('Error al crear el producto o al subir la imagen:', err);
-    res.status(500).json({
-      error: 'Error al crear el producto o al subir la imagen a Cloudinary',
-      details: err.message,
-    });
+    console.error('Error al crear el producto:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor al crear el producto' });
   }
 };
+
 
 // Listar productos
 exports.getAllProducts = (req, res) => {

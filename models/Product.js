@@ -12,20 +12,21 @@ const Product = {
       });
   },
 
-  create: (name, price, description, expirationDate, imagenurl) => {
-    if (!name || !price || !description || !expirationDate || !imagenurl) {
+  create: (name, price, description, expirationDate, image) => {
+    if (!name || !price || !description || !expirationDate || !image) {
       return Promise.reject(new Error('Todos los campos son requeridos'));
     }
 
     return db.query(
-      'INSERT INTO products (name, price, description, expiration_date, imagenurl) VALUES (?, ?, ?, ?, ?)', 
-      [name, price, description, expirationDate, imagenurl]
+      'INSERT INTO products (name, price, description, expiration_date, image) VALUES (?, ?, ?, ?, ?)', 
+      [name, price, description, expirationDate, image]
     )
     .then(([result]) => {
-      return result; // Retornar el resultado
+      return { id: result.insertId, name, price, description, expirationDate, image };
     })
     .catch((err) => {
-      throw err; // Lanzar error si algo falla
+      console.error('Error en la inserción del producto:', err);
+      throw new Error('Error al crear el producto en la base de datos');
     });
   }
 };

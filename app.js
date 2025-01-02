@@ -14,6 +14,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
   })); // El puerto donde está corriendo tu frontend
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
 const PORT = process.env.PORT || 3000;
@@ -23,6 +24,16 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api', protectedRoutes); // Asegúrate de usar el prefijo adecuado
+
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    res.status(400).json({ error: err.message });
+  } else if (err) {
+    res.status(500).json({ error: err.message });
+  } else {
+    next();
+  }
+});
 
 
 // Servidor en ejecución
